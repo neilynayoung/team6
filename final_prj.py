@@ -1,4 +1,4 @@
-import time
+﻿import time
 import math
 import pymysql
 from bs4 import BeautifulSoup
@@ -58,3 +58,5 @@ except Exception as e1 :
     print("e1=============", e1)
 finally:
     driver.close()
+
+# 수정 합니다!
