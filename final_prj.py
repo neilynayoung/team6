@@ -38,7 +38,7 @@ try:
                             test_class1_num1 = driver.find_element_by_xpath('//*[@id="div{}{}"]/table[1]/tbody/tr/td[2]/table[{}]/tbody/tr[1]/td[1]'.format(test2-2,test3,test4-3))
                             test_class1_exam1 = driver.find_element_by_xpath('//*[@id="div{}{}"]/table[1]/tbody/tr/td[2]/table[{}]/tbody/tr[1]/td[2]'.format(test2-2,test3,test4-3))
                             try:
-                                test_class1_img1 = driver.find_element_by_xpath('//*[@id="div{}{}"]/table[1]/tbody/tr/td[2]/table[{}]/tbody/tr[1]/td[2]/img'.format(test2-2,test3,test4-3)).text
+                                test_class1_img1 = driver.find_element_by_xpath('//*[@id="div{}{}"]/table[1]/tbody/tr/td[2]/table[{}]/tbody/tr[1]/td[2]/img'.format(test2-2,test3,test4-3))
                             except Exception as e1_img :
                                 test_class1_img1 = None
                                 pass
