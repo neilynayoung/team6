@@ -11,7 +11,7 @@ main_url = "http://www.gunsys.com/q/index.php?currentPage={}&bigCode=10&midCode=
 driver = webdriver.Chrome("C:/driver/chromedriver.exe")
 
 try:
-    for page in range(1,4):    # page 1 ~ 4
+    for page in range(1,4):    # page 1 ~ 3
         driver.get("http://www.gunsys.com/q/index.php?currentPage={}&bigCode=10&midCode=1010&smallCode=".format(page))
 
         for test in range(2, 22): # 한 페이지마다 문제풀기 클릭 
@@ -38,7 +38,7 @@ try:
                             test_class1_num1 = driver.find_element_by_xpath('//*[@id="div{}{}"]/table[1]/tbody/tr/td[2]/table[{}]/tbody/tr[1]/td[1]'.format(test2-2,test3,test4-3))
                             test_class1_exam1 = driver.find_element_by_xpath('//*[@id="div{}{}"]/table[1]/tbody/tr/td[2]/table[{}]/tbody/tr[1]/td[2]'.format(test2-2,test3,test4-3))
                             try:
-                                test_class1_img1 = driver.find_element_by_xpath('//*[@id="div{}{}"]/table[1]/tbody/tr/td[2]/table[{}]/tbody/tr[1]/td[2]/img'.format(test2-2,test3,test4-3))
+                                test_class1_img1 = driver.find_element_by_xpath('//*[@id="div{}{}"]/table[1]/tbody/tr/td[2]/table[{}]/tbody/tr[1]/td[2]/img'.format(test2-2,test3,test4-3)).text
                             except Exception as e1_img :
                                 test_class1_img1 = None
                                 pass
@@ -48,27 +48,28 @@ try:
                         else:
                             test_class1_img = 1
                         
-                        str_test_class1_num1 = (test_class1_num1.text).rstrip('.')
-
+                        str_test_class1_num1 = int((test_class1_num1.text).rstrip('.'))
                         str_test_class1_exam1 = test_class1_exam1.text
 
                         yearhoi = driver.find_element_by_xpath('//*[@id="body_style"]/div/div/div/div[2]/table[1]/tbody/tr/td[1]').text     # 정보처리기사 필기 (2018년 2회 기출문제) 응시 Timer 0분 2초
-                        
                         year1 = yearhoi.split(" (")
                         year2 = year1[1].split("년")
                         year = year2[0]
+                        year = int(year)
 
                         hoi1 = yearhoi.split("년")
                         hoi2 = hoi1[1].split("회")
                         hoi = hoi2[0]
+                        hoi = int(hoi)
                         
-                        if(int(str_test_class1_num1) / 20 <= 1):
+                        
+                        if((str_test_class1_num1) / 20 <= 1):
                             sub = 1
-                        elif(int(str_test_class1_num1) / 40 <= 1):
+                        elif((str_test_class1_num1) / 40 <= 1):
                             sub = 2
-                        elif(int(str_test_class1_num1) / 60 <= 1):
+                        elif((str_test_class1_num1) / 60 <= 1):
                             sub = 3
-                        elif(int(str_test_class1_num1) / 80 <= 1):
+                        elif((str_test_class1_num1) / 80 <= 1):
                             sub = 4
                         else:
                             sub = 5
@@ -76,9 +77,16 @@ try:
                         current_url = driver.current_url
 
                         print(year,"년 ",hoi,"회차",sub,"과목", test_class1_img,"이미지 여부",current_url,"url")
-                        
-
                         print(str_test_class1_num1,".", str_test_class1_exam1)
+                        
+                        conn = pymysql.connect(host='localhost', user='root', password='1234', db='test', charset='utf8')
+                        cur = conn.cursor()
+                        sql = """insert into problem_main(p_year,p_hoi,p_class,p_num,p_url,p_title,p_conf,p_type,p_percent,p_answer) values(%s,%s,%s,%s,%s,%s,%s,0,0,0)"""
+                        
+                        cur.execute( sql,(year,hoi,sub,str_test_class1_num1,current_url,str_test_class1_exam1,test_class1_img))
+                        conn.commit()
+                        conn.close()
+                        print("저장 성공!!!")
                             
                     if(test3 != 3):    # 마지막페이지 다음 누르면 에러뜨기 때문
                         next_btn = driver.find_element_by_xpath('//*[@id="div{}{}"]/table[2]/tbody/tr/td[2]/input'.format(test2-2,test3)).click()

@@ -70,6 +70,7 @@ try:
                             str_op2 = driver.find_element_by_xpath('//*[@id="quesitem{0}{1}"]'.format((test4+(test3*5) + ((test2-2)*20)),test5))
 
                             answer_style = str_op2.get_attribute('style')
+                            print()
 
                             if(len(answer_style) > 2):
                                 op_ans = 1
