@@ -48,7 +48,6 @@ class MainActivity : AppCompatActivity() {
         when (item.itemId) {
             // 메인창
             R.id.navigation_main -> {
-
                 return@OnNavigationItemSelectedListener true
             }
             // 사용자 후기 공유 창
@@ -76,7 +75,6 @@ class MainActivity : AppCompatActivity() {
         transaction.commit()
     }
 
-
     // 사진 기능 관련 변수
     private var btn: Button? = null
     private var imageview: ImageView? = null
@@ -94,7 +92,6 @@ class MainActivity : AppCompatActivity() {
 
     val RC_SIGN_IN = 1
 
-
     // 2. 머신러닝 모델 관련
     private lateinit var conditionsBuilder: FirebaseModelDownloadConditions.Builder
     private lateinit var inputOutputOptions: FirebaseModelInputOutputOptions
@@ -109,7 +106,6 @@ class MainActivity : AppCompatActivity() {
         // 하단 네비게이션 바 초기화
         var bottomNavigation: BottomNavigationView = findViewById(R.id.navigationView)
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
-
 
         // 사진 관련
         btn = findViewById<View>(R.id.btn) as Button

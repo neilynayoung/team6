@@ -1,6 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                                             android:layout_width="match_parent"
-                                             android:layout_height="match_parent">
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              tools:context="com.google.firebase.encore.koreanfood.MainActivity">
 
-</android.support.constraint.ConstraintLayout>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/btn"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="40dp"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Select or Capture Image"/>
+
+    <ImageView
+            android:layout_width="300dp"
+            android:layout_height="298dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:scaleType="fitXY"
+            android:src="@mipmap/ic_launcher"
+            android:id="@+id/iv"/>
+    <TextView
+            android:text="TextView"
+            android:layout_width="match_parent"
+            android:layout_height="45dp" android:id="@+id/resultText" android:textSize="24sp"/>
+
+
+</LinearLayout>
