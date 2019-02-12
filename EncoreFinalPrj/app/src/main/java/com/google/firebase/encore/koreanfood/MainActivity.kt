@@ -16,8 +16,6 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -42,23 +40,35 @@ Output shape = [1, 150]
 
 class MainActivity : AppCompatActivity() {
 
-    // main 하단 네비게이션 바 선택 액션 관련 설정
+    // Fragment 인스턴스 : activity에서 fragment의 변수를 갖고 오기 위한 용도
+    private var photoFragment: PhotoFragment? = null
+    private var shareFragment: ShareFragment? = null
+    private var mypageFragment: MypageFragment? = null
 
+    // 네비게이션 하단 바 액션 등록
     private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+
         when (item.itemId) {
             // 메인창
-            R.id.navigation_main -> {
+            R.id.navigation_photo -> {
+                val photoFragment = PhotoFragment.newInstance()
+                openFragment(photoFragment)
+                // 전역 변수에 로컬 변수를 지정
+                this.photoFragment = photoFragment
                 return@OnNavigationItemSelectedListener true
             }
             // 사용자 후기 공유 창
             R.id.navigation_share -> {
                 val shareFragment = ShareFragment.newInstance()
                 openFragment(shareFragment)
+                // 전역 변수에 로컬 변수를 지정
+//                this.shareFragment = shareFragment
 
                 return@OnNavigationItemSelectedListener true
             }
             // 마이페이지 창
             R.id.navigation_mypage -> {
+
                 val mypageFragment = MypageFragment.newInstance()
                 openFragment(mypageFragment)
 
@@ -68,15 +78,8 @@ class MainActivity : AppCompatActivity() {
         false
     }
 
-    private fun openFragment(fragment: Fragment){
-        val transaction = supportFragmentManager.beginTransaction()
-        transaction.replace(R.id.container, fragment)
-        transaction.addToBackStack(null)
-        transaction.commit()
-    }
 
     // 사진 기능 관련 변수
-    private var btn: Button? = null
     private var imageview: ImageView? = null
     private var resultText: TextView? = null
 
@@ -103,15 +106,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // 하단 네비게이션 바 초기화
-        var bottomNavigation: BottomNavigationView = findViewById(R.id.navigationView)
-        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+        // fragment_photo의 요소들 중 btn은 PhotoFragment에서, imageView와 resultText는 MainActivity에서 초기화한다.
 
-        // 사진 관련
-        btn = findViewById<View>(R.id.btn) as Button
-        imageview = findViewById<View>(R.id.iv) as ImageView
-        resultText = findViewById<View>(R.id.resultText) as TextView
-        btn!!.setOnClickListener { showPictureDialog() }
+        val bottomNavigation: BottomNavigationView = findViewById(R.id.navigationView)
+        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
 
         // ML kit 관련 초기화
         initKoreanFoodClassifier()
@@ -144,6 +142,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         mFirebaseAuth!!.addAuthStateListener (mAuthStateListener!!)
+
     }
 
     override fun onPause() {
@@ -153,12 +152,21 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
 
-    private fun showPictureDialog() {
+    fun openFragment(fragment: Fragment){
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.container, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+
+    }
+
+    fun showPictureDialog() {
         val pictureDialog = AlertDialog.Builder(this)
         pictureDialog.setTitle("Select Action")
         val pictureDialogItems = arrayOf("Select photo from gallery", "Capture photo from camera")
@@ -195,7 +203,6 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
     public override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?) {
 
         super.onActivityResult(requestCode, resultCode, data)
@@ -207,14 +214,18 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Signed in cancelled!", Toast.LENGTH_SHORT).show()
                 finish()
             }
-
         }
         else if(requestCode == GALLERY) {
-
-            Log.d("갤러리", GALLERY.toString())
             if (data != null) {
                 val contentURI = data.data
                 try {
+
+                    // PhotoFragment에 있는 imageview, resultText를 받아오는 코드
+                    if (imageview == null){
+                        imageview = photoFragment?.imageView
+                        resultText = photoFragment?.resultText
+                    }
+
                     val bitmap = MediaStore.Images.Media.getBitmap(this.contentResolver, contentURI)
                     val path = saveImage(bitmap)
                     // 음식 종류 추론
@@ -230,13 +241,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
         else if (requestCode == CAMERA) {
-            Log.d("가나다라", CAMERA.toString())
-
             val thumbnail = data!!.extras!!.get("data") as Bitmap
+
+
+            // PhotoFragment에 있는 imageview, resultText를 받아오는 코드
+            if (imageview == null){
+                imageview = photoFragment?.imageView
+                resultText = photoFragment?.resultText
+            }
+
             imageview!!.setImageBitmap(thumbnail)
             // 음식 종류 추론
             foodInference(thumbnail)
-
             saveImage(thumbnail)
             Toast.makeText(this@MainActivity, "Image Saved!", Toast.LENGTH_SHORT).show()
         }
@@ -374,8 +390,6 @@ class MainActivity : AppCompatActivity() {
     private fun onSignedOutCleanUp() {
         mUsername = ANONYMOUS
     }
-
-
 
     companion object {
         private val IMAGE_DIRECTORY = "/demonuts"

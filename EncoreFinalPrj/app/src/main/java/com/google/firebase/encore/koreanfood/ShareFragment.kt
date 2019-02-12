@@ -10,6 +10,7 @@ class ShareFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
     = inflater.inflate(R.layout.fragment_share, container, false)
+
     companion object {
         fun newInstance(): ShareFragment = ShareFragment()
     }
