@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+            android:id="@+id/navigation_main"
+            android:icon="@drawable/ic_photo_camera_black_24dp"
+            android:title="Photo"/>
+
+    <item
+            android:id="@+id/navigation_share"
+            android:icon="@drawable/ic_folder_shared_black_24dp"
+            android:title="Share"/>
+
+    <item
+            android:id="@+id/navigation_mypage"
+            android:icon="@drawable/ic_person_black_24dp"
+            android:title="Mypage"/>
+
+
+</menu>

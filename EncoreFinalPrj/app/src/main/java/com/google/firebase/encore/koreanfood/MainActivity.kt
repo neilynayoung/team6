@@ -9,6 +9,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.provider.MediaStore
+import android.support.design.widget.BottomNavigationView
+import android.support.v4.app.Fragment
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -40,6 +42,41 @@ Output shape = [1, 150]
 
 class MainActivity : AppCompatActivity() {
 
+    // main 하단 네비게이션 바 선택 액션 관련 설정
+
+    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        when (item.itemId) {
+            // 메인창
+            R.id.navigation_main -> {
+
+                return@OnNavigationItemSelectedListener true
+            }
+            // 사용자 후기 공유 창
+            R.id.navigation_share -> {
+                val shareFragment = ShareFragment.newInstance()
+                openFragment(shareFragment)
+
+                return@OnNavigationItemSelectedListener true
+            }
+            // 마이페이지 창
+            R.id.navigation_mypage -> {
+                val mypageFragment = MypageFragment.newInstance()
+                openFragment(mypageFragment)
+
+                return@OnNavigationItemSelectedListener  true
+            }
+        }
+        false
+    }
+
+    private fun openFragment(fragment: Fragment){
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.container, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
+    }
+
+
     // 사진 기능 관련 변수
     private var btn: Button? = null
     private var imageview: ImageView? = null
@@ -68,6 +105,11 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // 하단 네비게이션 바 초기화
+        var bottomNavigation: BottomNavigationView = findViewById(R.id.navigationView)
+        bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+
 
         // 사진 관련
         btn = findViewById<View>(R.id.btn) as Button
