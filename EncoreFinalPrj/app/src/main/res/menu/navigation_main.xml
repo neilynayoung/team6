@@ -2,14 +2,14 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-            android:id="@+id/navigation_photo"
-            android:icon="@drawable/ic_photo_camera_black_24dp"
-            android:title="Photo"/>
-
-    <item
             android:id="@+id/navigation_share"
             android:icon="@drawable/ic_folder_shared_black_24dp"
             android:title="Share"/>
+
+    <item
+            android:id="@+id/navigation_photo"
+            android:icon="@drawable/ic_photo_camera_black_24dp"
+            android:title="Photo"/>
 
     <item
             android:id="@+id/navigation_mypage"
