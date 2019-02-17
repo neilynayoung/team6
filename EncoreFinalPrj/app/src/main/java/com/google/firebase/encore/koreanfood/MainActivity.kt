@@ -22,7 +22,10 @@ import android.widget.Toast
 import com.firebase.ui.auth.AuthUI
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.encore.koreanfood.DataModel.ContentDTO
+import com.google.firebase.encore.koreanfood.DataModel.FoodMap
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import com.google.firebase.ml.custom.*
 import com.google.firebase.ml.custom.model.FirebaseCloudModelSource
 import com.google.firebase.ml.custom.model.FirebaseLocalModelSource
@@ -64,7 +67,7 @@ class MainActivity : AppCompatActivity() {
                 val shareFragment = ShareFragment.newInstance()
                 openFragment(shareFragment)
                 // 전역 변수에 로컬 변수를 지정
-                this.shareFragment = shareFragment
+                // this.shareFragment = shareFragment
                 return@OnNavigationItemSelectedListener true
             }
             // 마이페이지 창
@@ -77,7 +80,6 @@ class MainActivity : AppCompatActivity() {
         false
     }
 
-
     // 사진 기능 관련 변수 -> PhotoFragment UI 내에 component
     private var imageview: ImageView? = null
     private var resultText: TextView? = null
@@ -88,8 +90,9 @@ class MainActivity : AppCompatActivity() {
 
     // SubActivity로 PhotoFragment에 표시될 값을 전달
     var bitmap: Bitmap? = null
-//    var foodName: String? = null
-//    var prob: String? = null
+
+    // 저장된 사진 절대 경로
+    var photoPath: String? = null
 
     // FIrebase 관련 변수
 
@@ -110,16 +113,20 @@ class MainActivity : AppCompatActivity() {
     // 3. Cloud Firestore
     var firestore : FirebaseFirestore? = null
 
+    // 4. Cloud Firestore 내에 존재하는 DB
+    var contentDTOs: MutableList<ContentDTO> = ArrayList()
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // 처음 화면은 ShareFragment로!
-        openFragment(ShareFragment.newInstance())
-
         // fragment_photo의 요소들 중 btn은 PhotoFragment에서, imageView, resultText, resultProbText는 MainActivity에서 초기화한다.
         val bottomNavigation: BottomNavigationView = findViewById(R.id.navigationView)
         bottomNavigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
+
+        // 처음 화면은 ShareFragment로!
+        // val shareFragment = ShareFragment.newInstance()
 
         // ML kit 관련 초기화
         initKoreanFoodClassifier()
@@ -134,28 +141,44 @@ class MainActivity : AppCompatActivity() {
                 onSignedInInitialize(user.displayName)
             } else {
                 onSignedOutCleanUp()
+
                 startActivityForResult(
                     AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setIsSmartLockEnabled(false)
+                        .setTheme(R.style.GreenTheme)
                         .setAvailableProviders(Arrays.asList<AuthUI.IdpConfig>(
                             AuthUI.IdpConfig.GoogleBuilder().build(),
                             AuthUI.IdpConfig.EmailBuilder().build()
                         ))
-                        .setLogo(R.drawable.ic_photo_camera_gray_24dp)
+                        .setLogo(R.drawable.logo)
                         .build(), RC_SIGN_IN)
             }
-
-
         } // end of mAuthStateListener
+
 
         // Firestore
         firestore = FirebaseFirestore.getInstance()
+
+        firestore?.collection("photos")?.orderBy("timestamp", Query.Direction.ASCENDING)?.addSnapshotListener {
+                querySnapshot, firebaseFirestoreException ->
+            for (dc in querySnapshot!!.documents){
+                var contentDTO = dc.toObject(ContentDTO:: class.java)
+                Log.d("contentDTOs", contentDTO.toString())
+                contentDTOs.add(contentDTO!!)
+                Log.d("contentDTOs 갯수", contentDTOs.size.toString())
+
+            }
+        }
+
+        shareFragment?.contentDTOs = contentDTOs
 
     } // end of OnCreate
 
     override fun onResume() {
         super.onResume()
+
+
         mFirebaseAuth!!.addAuthStateListener (mAuthStateListener!!)
     }
 
@@ -177,7 +200,6 @@ class MainActivity : AppCompatActivity() {
         transaction.addToBackStack(null)
         transaction.commit()
     }
-
 
     fun showPictureDialog() {
         val pictureDialog = AlertDialog.Builder(this)
@@ -213,7 +235,6 @@ class MainActivity : AppCompatActivity() {
             }
             else -> return super.onOptionsItemSelected(item)
         }
-
     }
 
     public override fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent?) {
@@ -256,24 +277,23 @@ class MainActivity : AppCompatActivity() {
             }
         }
         else if (requestCode == CAMERA) {
+            if (data!= null){
+                val bitmap = data!!.extras!!.get("data") as Bitmap
+                // PhotoFragment에 있는 imageview, resultText, resultProbText를 받아오는 코드
+                if (imageview == null){
+                    imageview = photoFragment?.imageview
+                    resultText = photoFragment?.resultText
+                    resultProbText = photoFragment?.resultProbText
+                }
+                imageview!!.setImageBitmap(bitmap)
+                // bitmap 사진을 전역 변수에 저장 -> Intent통해 SubActivity로 bitmap을 전달!
+                this.bitmap = bitmap
+                // 음식 종류 추론
+                foodInference(bitmap)
+                saveImage(bitmap)
+                Toast.makeText(this@MainActivity, "Image Saved!", Toast.LENGTH_SHORT).show()
 
-            val bitmap = data!!.extras!!.get("data") as Bitmap
-            // PhotoFragment에 있는 imageview, resultText, resultProbText를 받아오는 코드
-            if (imageview == null){
-                imageview = photoFragment?.imageview
-                resultText = photoFragment?.resultText
-                resultProbText = photoFragment?.resultProbText
             }
-            imageview!!.setImageBitmap(bitmap)
-            // bitmap 사진을 전역 변수에 저장 -> Intent통해 SubActivity로 bitmap을 전달!
-            this.bitmap = bitmap
-            // 음식 종류 추론
-            foodInference(bitmap)
-            saveImage(bitmap)
-
-            Log.d("가나다라", bitmap.toString())
-            Log.d("다라마바", imageview.toString())
-            Toast.makeText(this@MainActivity, "Image Saved!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -294,7 +314,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("heel",wallpaperDirectory.toString())
             val f = File(wallpaperDirectory, ((Calendar.getInstance()
                 .getTimeInMillis()).toString() + ".jpg"))
-            Log.d("파일이름은", f.toString())
+
             f.createNewFile()
             val fo = FileOutputStream(f)
             fo.write(bytes.toByteArray())
@@ -303,6 +323,8 @@ class MainActivity : AppCompatActivity() {
                 arrayOf("image/jpeg"), null)
             fo.close()
             Log.d("TAG", "File Saved::--->" + f.getAbsolutePath())
+
+            photoPath = f.absolutePath
 
             return f.getAbsolutePath()
         }

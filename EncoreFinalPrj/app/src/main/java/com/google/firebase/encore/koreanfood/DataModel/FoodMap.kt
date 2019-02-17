@@ -1,4 +1,4 @@
-package com.google.firebase.encore.koreanfood
+package com.google.firebase.encore.koreanfood.DataModel
 
 class FoodMap {
 

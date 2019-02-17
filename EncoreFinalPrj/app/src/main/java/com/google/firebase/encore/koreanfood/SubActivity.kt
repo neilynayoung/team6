@@ -7,21 +7,21 @@ import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.Fragment
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
-import android.widget.Toast
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.storage.FirebaseStorage
 
 class SubActivity : AppCompatActivity() {
 
     // AddViewFragment에서 사용
     var mUsername: String? = null
     var bitmap: Bitmap? = null
+    var photoPath: String? = null
 
     // Cloud Firestore
-    var firestore_sub: FirebaseFirestore? = null
+    var firestore: FirebaseFirestore? = null
 
     // firebase storage
-    var firebaseStorage: FirebaseStorage? = null
+    // var firebaseStorage: FirebaseStorage? = null
+    // var photoStorageRef: StorageReference? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,7 +29,11 @@ class SubActivity : AppCompatActivity() {
         setContentView(R.layout.activity_sub)
 
         // firebase storage
-        firebaseStorage = FirebaseStorage.getInstance()
+//        firebaseStorage = FirebaseStorage.getInstance()
+//        photoStorageRef = firebaseStorage!!.reference.child("photos")
+
+        // firebase firestore
+        firestore = FirebaseFirestore.getInstance()
 
         // 네비게이션 하단 바 액션 등록
         val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
@@ -67,21 +71,25 @@ class SubActivity : AppCompatActivity() {
 
         // 2. 사용자 이름 받아오기
         mUsername = intent.getStringExtra("mUsername").toString()
-        firestore_sub = FirebaseFirestore.getInstance()
+
+        // 3. 사진 저장 경로 받아오기
+
+        photoPath = intent.getStringExtra("photoPath")
+
 
         } // end of onCreate
 
     // cloud database에 데이터 추가하는 메서드
-    fun createData(text: String?, name: String?, photoUrl: String?) {
-
-        var user_review = UserReview(text, name, photoUrl)
-        firestore_sub?.collection("user_review")?.document()?.set(user_review)?.addOnCompleteListener {
-                task ->
-            if(task.isSuccessful) {
-                Toast.makeText(this, "저장 성공", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
+//    fun createData(text: String?, name: String?, photoUrl: String?) {
+//
+//        var user_review = UserReview(text, name, photoUrl)
+//        firestore!!.collection("user_review")?.document()?.set(user_review)?.addOnCompleteListener {
+//                task ->
+//            if(task.isSuccessful) {
+//                Toast.makeText(this, "저장 성공", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+//    }
 
     private fun openFragment(fragment: Fragment){
         val transaction = supportFragmentManager.beginTransaction()
@@ -94,6 +102,9 @@ class SubActivity : AppCompatActivity() {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
+
+
+
 
 }
 
